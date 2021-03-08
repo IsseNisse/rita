@@ -5,6 +5,7 @@ import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
@@ -37,7 +38,7 @@ public class drawController {
     public void freeDraw(GraphicsContext gc, double mouseX, double mouseY) {
         drawFunction = "freeDraw";
         gc.setFill(Color.GREEN);
-        gc.fillRect(mouseX - size/5, mouseY - (size/2), size, size);
+        gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
     }
 
     public void drawLine(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
@@ -53,10 +54,23 @@ public class drawController {
             anchor2X = mouseX;
             anchor2Y = mouseY;
             gc.strokeLine(anchor1X, anchor1Y, anchor2X, anchor2Y);
+            gc.setLineWidth(size);
         }
     }
 
     public void drawLineBtn(ActionEvent actionEvent) {
         drawFunction = "drawLine";
+    }
+
+    public void size10(ActionEvent actionEvent) {
+        size = 10;
+    }
+
+    public void size15(ActionEvent actionEvent) {
+        size = 15;
+    }
+
+    public void size25(ActionEvent actionEvent) {
+        size = 25;
     }
 }

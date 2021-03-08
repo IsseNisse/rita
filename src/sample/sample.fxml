@@ -21,8 +21,9 @@
           <Button mnemonicParsing="false" text="Open" />
             <MenuButton mnemonicParsing="false" text="Size">
               <items>
-                <MenuItem mnemonicParsing="false" text="10px" />
-                <MenuItem mnemonicParsing="false" text="25px" />
+                <MenuItem id="10px" mnemonicParsing="false" onAction="#size10" text="10px" />
+                  <MenuItem id="10px" mnemonicParsing="false" onAction="#size15" text="15px" />
+                <MenuItem id="25px" mnemonicParsing="false" onAction="#size25" text="25px" />
               </items>
             </MenuButton>
         </items>
