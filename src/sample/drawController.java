@@ -1,28 +1,28 @@
 package sample;
 
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventType;
 import javafx.fxml.FXML;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.image.Image;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-
-import javax.imageio.ImageIO;
-import java.util.ArrayList;
 import java.util.Stack;
 
 public class drawController {
 
     @FXML
     private Canvas canvas;
+
+    @FXML
+    private ColorPicker colorPicker;
+
     private Stack<Image> savedImages = new Stack<>();
 
     private int size = 10;
+    private Color color = Color.BLACK;
 
     private double anchor1X;
     private double anchor1Y;
@@ -50,7 +50,7 @@ public class drawController {
     public void freeDraw(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
         if (!eventType.getName().equals("MOUSE_RELEASED")) {
-            gc.setFill(Color.GREEN);
+            gc.setFill(color);
             gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
         } else {
             /* save snapshot */
@@ -70,6 +70,7 @@ public class drawController {
         } else {
             anchor2X = mouseX;
             anchor2Y = mouseY;
+            gc.setStroke(color);
             gc.setLineWidth(size);
             gc.strokeLine(anchor1X, anchor1Y, anchor2X, anchor2Y);
 
@@ -84,6 +85,11 @@ public class drawController {
             Image undoImage = savedImages.pop();
             canvas.getGraphicsContext2D().drawImage(undoImage, 0, 0);
         }
+    }
+
+    public void colorPicker(ActionEvent actionEvent) {
+        Color colorValue = colorPicker.getValue();
+        color = Color.web(colorValue.toString());
     }
 
 
@@ -111,5 +117,4 @@ public class drawController {
     public void size25(ActionEvent actionEvent) {
         size = 25;
     }
-
 }
