@@ -5,7 +5,6 @@ import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.MenuItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
@@ -36,7 +35,6 @@ public class drawController {
     }
 
     public void freeDraw(GraphicsContext gc, double mouseX, double mouseY) {
-        drawFunction = "freeDraw";
         gc.setFill(Color.GREEN);
         gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
     }
@@ -44,7 +42,6 @@ public class drawController {
     public void drawLine(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
 
-        System.out.println(eventType);
         if (!eventType.getName().equals("MOUSE_RELEASED")) {
             if (eventType.getName().equals("MOUSE_PRESSED")) {
                 anchor1X = mouseX;
@@ -53,14 +50,27 @@ public class drawController {
         } else {
             anchor2X = mouseX;
             anchor2Y = mouseY;
-            gc.strokeLine(anchor1X, anchor1Y, anchor2X, anchor2Y);
             gc.setLineWidth(size);
+            gc.strokeLine(anchor1X, anchor1Y, anchor2X, anchor2Y);
         }
+    }
+
+    public void undo(ActionEvent actionEvent) {
+    }
+
+
+    /* Buttons for changing drawing type */
+
+    public void freeDrawBtn(ActionEvent actionEvent) {
+        drawFunction = "freeDraw";
     }
 
     public void drawLineBtn(ActionEvent actionEvent) {
         drawFunction = "drawLine";
     }
+
+
+    /* Size buttons */
 
     public void size10(ActionEvent actionEvent) {
         size = 10;
@@ -73,4 +83,5 @@ public class drawController {
     public void size25(ActionEvent actionEvent) {
         size = 25;
     }
+
 }
