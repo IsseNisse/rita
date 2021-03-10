@@ -19,8 +19,8 @@ public class drawController {
     @FXML
     private ColorPicker colorPicker;
 
-    private Stack<Image> savedImages = new Stack<>();
-    private Stack<Image> savedLines = new Stack<>();
+    private final Stack<Image> savedImages = new Stack<>();
+    private final Stack<Image> savedLines = new Stack<>();
 
     private int size = 10;
     private Color color = Color.BLACK;
@@ -32,6 +32,8 @@ public class drawController {
 
     private String drawFunction = "freeDraw";
 
+
+
     public void draw(javafx.scene.input.MouseEvent mouseEvent) {
         if (savedImages.empty()) {
             makeSnapshot(savedImages);
@@ -40,9 +42,9 @@ public class drawController {
         double mouseX = mouseEvent.getX();
         double mouseY = mouseEvent.getY();
 
-        if (drawFunction == "freeDraw") {
+        if (drawFunction.equals("freeDraw")) {
             freeDraw(gc, mouseX, mouseY, mouseEvent);
-        } else if (drawFunction == "drawLine") {
+        } else if (drawFunction.equals("drawLine")) {
             drawLine(gc, mouseX, mouseY, mouseEvent);
         }
     }
@@ -88,7 +90,7 @@ public class drawController {
         }
     }
 
-    private void makeSnapshot(Stack savedImages) {
+    private void makeSnapshot(Stack<Image> savedImages) {
         Image snapshot = canvas.snapshot(null, null);
         savedImages.push(snapshot);
     }
@@ -129,5 +131,23 @@ public class drawController {
 
     public void size25(ActionEvent actionEvent) {
         size = 25;
+    }
+
+    public void size40(ActionEvent actionEvent) {
+        size = 40;
+    }
+
+    public void size80(ActionEvent actionEvent) {
+        size = 80;
+    }
+
+    public void openBtn(ActionEvent actionEvent) {
+        Controller.openBtn();
+    }
+
+    public void saveBtn(ActionEvent actionEvent) {
+        makeSnapshot(savedImages);
+        Image latestImage = savedImages.lastElement();
+        Controller.saveBtn(latestImage);
     }
 }

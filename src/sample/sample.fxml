@@ -21,7 +21,8 @@
    <children>
       <ToolBar maxWidth="1.7976931348623157E308" prefHeight="40.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.valignment="TOP">
         <items>
-          <Button mnemonicParsing="false" text="Open" />
+          <Button mnemonicParsing="false" onAction="#openBtn" text="Open" />
+            <Button layoutX="10.0" layoutY="11.0" mnemonicParsing="false" onAction="#saveBtn" text="Save" />
         </items>
          <GridPane.margin>
             <Insets />
@@ -42,6 +43,8 @@
                 <MenuItem id="10px" mnemonicParsing="false" onAction="#size10" text="10px" />
                   <MenuItem id="10px" mnemonicParsing="false" onAction="#size15" text="15px" />
                 <MenuItem id="25px" mnemonicParsing="false" onAction="#size25" text="25px" />
+                  <MenuItem id="25px" mnemonicParsing="false" onAction="#size40" text="40px" />
+                  <MenuItem id="25px" mnemonicParsing="false" onAction="#size80" text="80px" />
               </items>
             </MenuButton>
             <ColorPicker fx:id="colorPicker" onAction="#colorPicker">
