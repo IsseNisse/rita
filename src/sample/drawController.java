@@ -20,6 +20,7 @@ public class drawController {
     private ColorPicker colorPicker;
 
     private Stack<Image> savedImages = new Stack<>();
+    private Stack<Image> savedLines = new Stack<>();
 
     private int size = 10;
     private Color color = Color.BLACK;
@@ -33,7 +34,7 @@ public class drawController {
 
     public void draw(javafx.scene.input.MouseEvent mouseEvent) {
         if (savedImages.empty()) {
-            makeSnapshot();
+            makeSnapshot(savedImages);
         }
         GraphicsContext gc = canvas.getGraphicsContext2D();
         double mouseX = mouseEvent.getX();
@@ -53,7 +54,7 @@ public class drawController {
             gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
         } else {
             /* save snapshot */
-            makeSnapshot();
+            makeSnapshot(savedImages);
         }
     }
 
@@ -64,10 +65,10 @@ public class drawController {
             if (eventType.getName().equals("MOUSE_PRESSED")) {
                 anchor1X = mouseX;
                 anchor1Y = mouseY;
-                makeSnapshot();
+                makeSnapshot(savedLines);
             } else if (eventType.getName().equals("MOUSE_DRAGGED")) {
-                if (!savedImages.empty()) {
-                    Image undoImage = savedImages.get(savedImages.size() - 1);
+                if (!savedLines.empty()) {
+                    Image undoImage = savedLines.get(savedLines.size() - 1);
                     canvas.getGraphicsContext2D().drawImage(undoImage, 0, 0);
                 }
                 gc.setStroke(color);
@@ -83,11 +84,11 @@ public class drawController {
             gc.strokeLine(anchor1X, anchor1Y, anchor2X, anchor2Y);
 
             /* save snapshot */
-            makeSnapshot();
+            makeSnapshot(savedImages);
         }
     }
 
-    private void makeSnapshot() {
+    private void makeSnapshot(Stack savedImages) {
         Image snapshot = canvas.snapshot(null, null);
         savedImages.push(snapshot);
     }
