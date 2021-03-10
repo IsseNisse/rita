@@ -1,5 +1,6 @@
 package sample;
 
+import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.event.EventType;
 import javafx.fxml.FXML;
@@ -19,7 +20,8 @@ public class drawController {
     @FXML
     private ColorPicker colorPicker;
 
-    private Stack<Image> savedImages = new Stack<>();
+    private final Stack<Image> savedImages = new Stack<>();
+    private final Stack<Image> savedLines = new Stack<>();
 
     private int size = 10;
     private Color color = Color.BLACK;
@@ -31,18 +33,20 @@ public class drawController {
 
     private String drawFunction = "freeDraw";
 
+
+
     public void draw(javafx.scene.input.MouseEvent mouseEvent) {
+
         if (savedImages.empty()) {
-            Image snapshot = canvas.snapshot(null, null);
-            savedImages.push(snapshot);
+            makeSnapshot(savedImages);
         }
         GraphicsContext gc = canvas.getGraphicsContext2D();
         double mouseX = mouseEvent.getX();
         double mouseY = mouseEvent.getY();
 
-        if (drawFunction == "freeDraw") {
+        if (drawFunction.equals("freeDraw")) {
             freeDraw(gc, mouseX, mouseY, mouseEvent);
-        } else if (drawFunction == "drawLine") {
+        } else if (drawFunction.equals("drawLine")) {
             drawLine(gc, mouseX, mouseY, mouseEvent);
         }
     }
@@ -54,8 +58,7 @@ public class drawController {
             gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
         } else {
             /* save snapshot */
-            Image snapshot = canvas.snapshot(null, null);
-            savedImages.push(snapshot);
+            makeSnapshot(savedImages);
         }
     }
 
@@ -66,6 +69,16 @@ public class drawController {
             if (eventType.getName().equals("MOUSE_PRESSED")) {
                 anchor1X = mouseX;
                 anchor1Y = mouseY;
+                makeSnapshot(savedLines);
+            } else if (eventType.getName().equals("MOUSE_DRAGGED")) {
+                if (!savedLines.empty()) {
+                    Image undoImage = savedLines.get(savedLines.size() - 1);
+                    canvas.getGraphicsContext2D().drawImage(undoImage, 0, 0);
+                }
+                gc.setStroke(color);
+                gc.setLineWidth(size);
+                gc.strokeLine(anchor1X, anchor1Y, mouseX, mouseY);
+
             }
         } else {
             anchor2X = mouseX;
@@ -75,9 +88,13 @@ public class drawController {
             gc.strokeLine(anchor1X, anchor1Y, anchor2X, anchor2Y);
 
             /* save snapshot */
-            Image snapshot = canvas.snapshot(null, null);
-            savedImages.push(snapshot);
+            makeSnapshot(savedImages);
         }
+    }
+
+    private void makeSnapshot(Stack<Image> savedImages) {
+        Image snapshot = canvas.snapshot(null, null);
+        savedImages.push(snapshot);
     }
 
     public void undo(ActionEvent actionEvent) {
@@ -116,5 +133,24 @@ public class drawController {
 
     public void size25(ActionEvent actionEvent) {
         size = 25;
+    }
+
+    public void size40(ActionEvent actionEvent) {
+        size = 40;
+    }
+
+    public void size80(ActionEvent actionEvent) {
+        size = 80;
+    }
+
+    public void openBtn(ActionEvent actionEvent) {
+        Image image = Controller.openBtn();
+        canvas.getGraphicsContext2D().drawImage(image, 0, 0);
+    }
+
+    public void saveBtn(ActionEvent actionEvent) {
+        makeSnapshot(savedImages);
+        Image latestImage = savedImages.lastElement();
+        Controller.saveBtn(latestImage);
     }
 }
