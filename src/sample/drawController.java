@@ -1,5 +1,6 @@
 package sample;
 
+import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.event.EventType;
 import javafx.fxml.FXML;
@@ -35,6 +36,7 @@ public class drawController {
 
 
     public void draw(javafx.scene.input.MouseEvent mouseEvent) {
+
         if (savedImages.empty()) {
             makeSnapshot(savedImages);
         }
@@ -142,7 +144,8 @@ public class drawController {
     }
 
     public void openBtn(ActionEvent actionEvent) {
-        Controller.openBtn();
+        Image image = Controller.openBtn();
+        canvas.getGraphicsContext2D().drawImage(image, 0, 0);
     }
 
     public void saveBtn(ActionEvent actionEvent) {
