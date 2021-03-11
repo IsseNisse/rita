@@ -7,6 +7,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import java.util.Stack;
@@ -48,7 +49,7 @@ public class drawController {
         } else if (drawFunction.equals("drawLine")) {
             drawLine(gc, mouseX, mouseY, mouseEvent);
         } else if (drawFunction.equals("fill")) {
-            fill();
+            fill(gc, mouseX, mouseY, mouseEvent);
         }
     }
 
@@ -93,7 +94,19 @@ public class drawController {
         }
     }
 
-    private void fill() {
+    private void fill(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
+        EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
+        boolean canSearch = true;
+
+        if (eventType.getName().equals("MOUSE_PRESSED")) {
+            Image latestSave = savedImages.get(savedImages.size() - 1);
+            PixelReader pixelReader = latestSave.getPixelReader();
+            pixelReader.getColor((int)mouseX, (int)mouseY);
+
+            while (canSearch) {
+
+            }
+        }
     }
 
     private void makeSnapshot(Stack<Image> savedImages) {
