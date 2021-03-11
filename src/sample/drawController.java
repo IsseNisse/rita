@@ -99,32 +99,49 @@ public class drawController {
     private void fill(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
         boolean canSearch = true;
-        ArrayList<Coordinate> coordinates = new ArrayList<>();
 
         if (eventType.getName().equals("MOUSE_PRESSED")) {
             Image latestSave = savedImages.get(savedImages.size() - 1);
             PixelReader pixelReader = latestSave.getPixelReader();
             pixelReader.getColor((int)mouseX, (int)mouseY);
-            Coordinate startCoordinate = new Coordinate((int)mouseX, (int)mouseY);
-            coordinates.add(startCoordinate);
             int i = 1;
 
             while (canSearch) {
+                ArrayList<Coordinate> coordinates = new ArrayList<>();
+
+                Coordinate startCoordinate = new Coordinate((int)mouseX, (int)mouseY);
+                coordinates.add(startCoordinate);
+
                 int edgeCoordinatesCount = i * 8;
 
                 for (int k = 0; k < edgeCoordinatesCount/4 + 1; k++) {
                     if (k == 0) {
                         coordinates.add(new Coordinate(startCoordinate.getX() - i, startCoordinate.getY() - i));
-                        coordinates.remove(0);
 
                     } else {
-                        coordinates.add(new Coordinate(coordinates.get(0).getX() + k, coordinates.get(0).getY()));
+                        coordinates.add(new Coordinate(coordinates.get(1).getX() + k, coordinates.get(1).getY()));
                     }
-                    coordinates.add(new Coordinate(coordinates.get(0).getX(), coordinates.get(0).getY() + k + 1));
-                    coordinates.add(new Coordinate(coordinates.get(0).getX() + k + 1, coordinates.get(0).getY() + k + 1));
+                    if (k < edgeCoordinatesCount/4) {
+                        coordinates.add(new Coordinate(coordinates.get(1).getX(), coordinates.get(1).getY() + k + 1));
+                        coordinates.add(new Coordinate(coordinates.get(1).getX() + k + 1, coordinates.get(1).getY() + k + 1));
+
+                    } else {
+                        coordinates.add(new Coordinate(coordinates.get(1).getX() + k, coordinates.get(1).getY() + k + 1));
+                        coordinates.add(new Coordinate(coordinates.get(1).getX() + k - 1, coordinates.get(1).getY() + k));
+                    }
+                    System.out.println(k);
+                }
+
+                if (i > 1) {
+                    canSearch = false;
                 }
 
                 i++;
+                System.out.println("Start Coordinate: " + coordinates.get(0).getX() + " " + coordinates.get(0).getY());
+                for (int j = 0; j < coordinates.size(); j++) {
+                    System.out.println(coordinates.get(j).getX() + " " + coordinates.get(j).getY());
+                }
+                System.out.println("\n");
             }
         }
     }
