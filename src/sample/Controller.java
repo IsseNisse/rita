@@ -31,6 +31,7 @@ public class Controller {
             });
         } else {
             Image openImage = new Image(file.toURI().toString());
+            drawController.emptySavedImages();
             return openImage;
         }
         return null;

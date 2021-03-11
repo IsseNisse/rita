@@ -1,6 +1,5 @@
 package sample;
 
-import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.event.EventType;
 import javafx.fxml.FXML;
@@ -20,7 +19,7 @@ public class drawController {
     @FXML
     private ColorPicker colorPicker;
 
-    private final Stack<Image> savedImages = new Stack<>();
+    private static final Stack<Image> savedImages = new Stack<>();
     private final Stack<Image> savedLines = new Stack<>();
 
     private int size = 10;
@@ -48,6 +47,8 @@ public class drawController {
             freeDraw(gc, mouseX, mouseY, mouseEvent);
         } else if (drawFunction.equals("drawLine")) {
             drawLine(gc, mouseX, mouseY, mouseEvent);
+        } else if (drawFunction.equals("fill")) {
+            fill();
         }
     }
 
@@ -92,6 +93,9 @@ public class drawController {
         }
     }
 
+    private void fill() {
+    }
+
     private void makeSnapshot(Stack<Image> savedImages) {
         Image snapshot = canvas.snapshot(null, null);
         savedImages.push(snapshot);
@@ -119,6 +123,8 @@ public class drawController {
     public void drawLineBtn(ActionEvent actionEvent) {
         drawFunction = "drawLine";
     }
+
+    public void fillBtn(ActionEvent actionEvent) { drawFunction = "fill"; }
 
 
     /* Size buttons */
@@ -152,5 +158,9 @@ public class drawController {
         makeSnapshot(savedImages);
         Image latestImage = savedImages.lastElement();
         Controller.saveBtn(latestImage);
+    }
+
+    public static void emptySavedImages() {
+        savedImages.clear();
     }
 }
