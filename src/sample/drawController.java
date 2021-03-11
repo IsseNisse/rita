@@ -10,6 +10,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+
+import java.util.ArrayList;
 import java.util.Stack;
 
 public class drawController {
@@ -97,14 +99,32 @@ public class drawController {
     private void fill(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
         boolean canSearch = true;
+        ArrayList<Coordinate> coordinates = new ArrayList<>();
 
         if (eventType.getName().equals("MOUSE_PRESSED")) {
             Image latestSave = savedImages.get(savedImages.size() - 1);
             PixelReader pixelReader = latestSave.getPixelReader();
             pixelReader.getColor((int)mouseX, (int)mouseY);
+            Coordinate startCoordinate = new Coordinate((int)mouseX, (int)mouseY);
+            coordinates.add(startCoordinate);
+            int i = 1;
 
             while (canSearch) {
+                int edgeCoordinatesCount = i * 8;
 
+                for (int k = 0; k < edgeCoordinatesCount/4 + 1; k++) {
+                    if (k == 0) {
+                        coordinates.add(new Coordinate(startCoordinate.getX() - i, startCoordinate.getY() - i));
+                        coordinates.remove(0);
+
+                    } else {
+                        coordinates.add(new Coordinate(coordinates.get(0).getX() + k, coordinates.get(0).getY()));
+                    }
+                    coordinates.add(new Coordinate(coordinates.get(0).getX(), coordinates.get(0).getY() + k + 1));
+                    coordinates.add(new Coordinate(coordinates.get(0).getX() + k + 1, coordinates.get(0).getY() + k + 1));
+                }
+
+                i++;
             }
         }
     }

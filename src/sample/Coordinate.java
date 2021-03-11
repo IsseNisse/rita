@@ -1,10 +1,10 @@
 package sample;
 
-public class coordinate {
+public class Coordinate {
     private int x;
     private int y;
 
-    public coordinate(int x, int y) {
+    public Coordinate(int x, int y) {
         this.x = x;
         this.y = y;
     }
