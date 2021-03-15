@@ -1,5 +1,6 @@
 package sample;
 
+import com.sun.javafx.geom.Path2D;
 import javafx.event.ActionEvent;
 import javafx.event.EventType;
 import javafx.fxml.FXML;
@@ -12,6 +13,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Stack;
 
 public class drawController {
@@ -98,50 +100,46 @@ public class drawController {
 
     private void fill(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
-        boolean canSearch = true;
+        ArrayList<Coordinate> toCheck = new ArrayList<>();
+        HashSet<Coordinate> toColor = new HashSet<>();
+        HashSet<Coordinate> checked = new HashSet<>();
+        Coordinate startCoordinate = new Coordinate((int)mouseX, (int)mouseY);
+        toCheck.add(startCoordinate);
 
         if (eventType.getName().equals("MOUSE_PRESSED")) {
             Image latestSave = savedImages.get(savedImages.size() - 1);
             PixelReader pixelReader = latestSave.getPixelReader();
-            pixelReader.getColor((int)mouseX, (int)mouseY);
-            int i = 1;
+            Color colorToChange = pixelReader.getColor((int)mouseX, (int)mouseY);
 
-            while (canSearch) {
-                ArrayList<Coordinate> coordinates = new ArrayList<>();
-
-                Coordinate startCoordinate = new Coordinate((int)mouseX, (int)mouseY);
-                coordinates.add(startCoordinate);
-
-                int edgeCoordinatesCount = i * 8;
-
-                for (int k = 0; k < edgeCoordinatesCount/4 + 1; k++) {
-                    if (k == 0) {
-                        coordinates.add(new Coordinate(startCoordinate.getX() - i, startCoordinate.getY() - i));
-
-                    } else {
-                        coordinates.add(new Coordinate(coordinates.get(1).getX() + k, coordinates.get(1).getY()));
-                    }
-                    if (k < edgeCoordinatesCount/4) {
-                        coordinates.add(new Coordinate(coordinates.get(1).getX(), coordinates.get(1).getY() + k + 1));
-                        coordinates.add(new Coordinate(coordinates.get(1).getX() + k + 1, coordinates.get(1).getY() + k + 1));
-
-                    } else {
-                        coordinates.add(new Coordinate(coordinates.get(1).getX() + k, coordinates.get(1).getY() + k + 1));
-                        coordinates.add(new Coordinate(coordinates.get(1).getX() + k - 1, coordinates.get(1).getY() + k));
-                    }
-                    System.out.println(k);
+            while (!toCheck.isEmpty()) {
+                Coordinate check = toCheck.get(toCheck.size() - 1);
+                Color pixelColor = pixelReader.getColor(check.getX(), check.getY());
+                System.out.println(pixelColor);
+                if (pixelColor == colorToChange) {
+                    toColor.add(check);
                 }
 
-                if (i > 1) {
-                    canSearch = false;
+                Coordinate co1 = new Coordinate(check.getX() + 1, check.getY());
+                Coordinate co2 = new Coordinate(check.getX() - 1, check.getY());
+                Coordinate co3 = new Coordinate(check.getX(), check.getY() + 1);
+                Coordinate co4 = new Coordinate(check.getX(), check.getY() - 1);
+                if (!checked.contains(co1)) {
+                    toCheck.add(co1);
+                } else if (!checked.contains(co2)) {
+                    toCheck.add(co2);
+                } else if (!checked.contains(co3)) {
+                    toCheck.add(co3);
+                } else if (!checked.contains(co4)) {
+                    toCheck.add(co4);
                 }
 
-                i++;
-                System.out.println("Start Coordinate: " + coordinates.get(0).getX() + " " + coordinates.get(0).getY());
-                for (int j = 0; j < coordinates.size(); j++) {
-                    System.out.println(coordinates.get(j).getX() + " " + coordinates.get(j).getY());
-                }
-                System.out.println("\n");
+                checked.add(check);
+                toCheck.remove(check);
+            }
+
+            for (Coordinate co : toColor) {
+                gc.setFill(color);
+                gc.fillRect(co.getX(), co.getY(), 1, 1);
             }
         }
     }
