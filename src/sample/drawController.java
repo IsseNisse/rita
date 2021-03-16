@@ -1,6 +1,6 @@
 package sample;
 
-import javafx.animation.AnimationTimer;
+import com.sun.javafx.geom.Path2D;
 import javafx.event.ActionEvent;
 import javafx.event.EventType;
 import javafx.fxml.FXML;
@@ -8,9 +8,11 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import java.util.Stack;
+
+import java.util.*;
 
 public class drawController {
 
@@ -20,7 +22,7 @@ public class drawController {
     @FXML
     private ColorPicker colorPicker;
 
-    private final Stack<Image> savedImages = new Stack<>();
+    private static final Stack<Image> savedImages = new Stack<>();
     private final Stack<Image> savedLines = new Stack<>();
 
     private int size = 10;
@@ -48,6 +50,8 @@ public class drawController {
             freeDraw(gc, mouseX, mouseY, mouseEvent);
         } else if (drawFunction.equals("drawLine")) {
             drawLine(gc, mouseX, mouseY, mouseEvent);
+        } else if (drawFunction.equals("fill")) {
+            fill(gc, mouseX, mouseY, mouseEvent);
         }
     }
 
@@ -92,6 +96,52 @@ public class drawController {
         }
     }
 
+    private void fill(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
+        EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
+        Stack<Coordinate> toCheck = new Stack<>();
+        HashSet<Coordinate> toColor = new HashSet<>();
+        HashSet<Coordinate> checked = new HashSet<>();
+
+        if (eventType.getName().equals("MOUSE_PRESSED")) {
+            Image latestSave = savedImages.get(savedImages.size() - 1);
+            Coordinate startCoordinate = new Coordinate((int)mouseX, (int)mouseY);
+            toCheck.add(startCoordinate);
+            PixelReader pixelReader = latestSave.getPixelReader();
+            Color colorToChange = pixelReader.getColor((int)mouseX, (int)mouseY);
+
+            while (!toCheck.isEmpty()) {
+                Coordinate check = toCheck.pop();
+                Color pixelColor = pixelReader.getColor(check.getX(), check.getY());
+                if (pixelColor.toString().equals(colorToChange.toString())) {
+                    toColor.add(check);
+                    Coordinate co1 = new Coordinate(check.getX() + 1, check.getY());
+                    Coordinate co2 = new Coordinate(check.getX() - 1, check.getY());
+                    Coordinate co3 = new Coordinate(check.getX(), check.getY() + 1);
+                    Coordinate co4 = new Coordinate(check.getX(), check.getY() - 1);
+                    if (!checked.contains(co1)) {
+                        toCheck.add(co1);
+                    }
+                    if (!checked.contains(co2)) {
+                        toCheck.add(co2);
+                    }
+                    if (!checked.contains(co3)) {
+                        toCheck.add(co3);
+                    }
+                    if (!checked.contains(co4)) {
+                        toCheck.add(co4);
+                    }
+                }
+
+                checked.add(check);
+            }
+
+            for (Coordinate co : toColor) {
+                gc.setFill(color);
+                gc.fillRect(co.getX(), co.getY(), 1, 1);
+            }
+        }
+    }
+
     private void makeSnapshot(Stack<Image> savedImages) {
         Image snapshot = canvas.snapshot(null, null);
         savedImages.push(snapshot);
@@ -119,6 +169,8 @@ public class drawController {
     public void drawLineBtn(ActionEvent actionEvent) {
         drawFunction = "drawLine";
     }
+
+    public void fillBtn(ActionEvent actionEvent) { drawFunction = "fill"; }
 
 
     /* Size buttons */
@@ -152,5 +204,9 @@ public class drawController {
         makeSnapshot(savedImages);
         Image latestImage = savedImages.lastElement();
         Controller.saveBtn(latestImage);
+    }
+
+    public static void emptySavedImages() {
+        savedImages.clear();
     }
 }
