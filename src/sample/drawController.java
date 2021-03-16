@@ -1,6 +1,5 @@
 package sample;
 
-import com.sun.javafx.geom.Path2D;
 import javafx.event.ActionEvent;
 import javafx.event.EventType;
 import javafx.fxml.FXML;
@@ -34,7 +33,7 @@ public class drawController {
     private double anchor2Y;
 
     private String drawFunction = "freeDraw";
-    private String shape = "square";
+    private String shape = "circle";
 
 
     public void draw(javafx.scene.input.MouseEvent mouseEvent) {
@@ -59,11 +58,7 @@ public class drawController {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
         if (!eventType.getName().equals("MOUSE_RELEASED")) {
             gc.setFill(color);
-            if (shape.equals("square")) {
-                gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
-            } else if (shape.equals("circle")) {
-                gc.fillOval(mouseX - (size/2), mouseY - (size/2), size, size);
-            }
+            brush(gc, mouseX, mouseY);
         } else {
             /* save snapshot */
             makeSnapshot(savedImages);
@@ -102,7 +97,7 @@ public class drawController {
 
     private void fill(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
-        Stack<Coordinate> toCheck = new Stack<>();
+        HashSet<Coordinate> toCheck = new HashSet<>();
         HashSet<Coordinate> toColor = new HashSet<>();
         HashSet<Coordinate> checked = new HashSet<>();
 
@@ -114,7 +109,7 @@ public class drawController {
             Color colorToChange = pixelReader.getColor((int)mouseX, (int)mouseY);
 
             while (!toCheck.isEmpty()) {
-                Coordinate check = toCheck.pop();
+                Coordinate check = toCheck.iterator().next();
                 Color pixelColor = pixelReader.getColor(check.getX(), check.getY());
                 if (pixelColor.toString().equals(colorToChange.toString())) {
                     toColor.add(check);
@@ -135,7 +130,7 @@ public class drawController {
                         toCheck.add(co4);
                     }
                 }
-
+                toCheck.remove(check);
                 checked.add(check);
             }
 
@@ -143,6 +138,14 @@ public class drawController {
                 gc.setFill(color);
                 gc.fillRect(co.getX(), co.getY(), 1, 1);
             }
+        }
+    }
+
+    private void brush(GraphicsContext gc, double mouseX, double mouseY) {
+        if (shape.equals("square")) {
+            gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
+        } else if (shape.equals("circle")) {
+            gc.fillOval(mouseX - (size/2), mouseY - (size/2), size, size);
         }
     }
 
