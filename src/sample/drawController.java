@@ -34,7 +34,7 @@ public class drawController {
     private double anchor2Y;
 
     private String drawFunction = "freeDraw";
-
+    private String shape = "square";
 
 
     public void draw(javafx.scene.input.MouseEvent mouseEvent) {
@@ -59,7 +59,11 @@ public class drawController {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
         if (!eventType.getName().equals("MOUSE_RELEASED")) {
             gc.setFill(color);
-            gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
+            if (shape.equals("square")) {
+                gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
+            } else if (shape.equals("circle")) {
+                gc.fillOval(mouseX - (size/2), mouseY - (size/2), size, size);
+            }
         } else {
             /* save snapshot */
             makeSnapshot(savedImages);
@@ -198,6 +202,14 @@ public class drawController {
     public void openBtn(ActionEvent actionEvent) {
         Image image = Controller.openBtn();
         canvas.getGraphicsContext2D().drawImage(image, 0, 0);
+    }
+
+    public void Square(ActionEvent actionEvent) {
+        shape = "square";
+    }
+
+    public void Circle(ActionEvent actionEvent) {
+        shape = "circle";
     }
 
     public void saveBtn(ActionEvent actionEvent) {
