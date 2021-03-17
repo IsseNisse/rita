@@ -97,41 +97,45 @@ public class drawController {
 
     private void fill(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
-        HashSet<Coordinate> toCheck = new HashSet<>();
+        Coordinate[] toCheck = new Coordinate[1913600];
         HashSet<Coordinate> toColor = new HashSet<>();
-        HashSet<Coordinate> checked = new HashSet<>();
+        HashSet<Coordinate> processed = new HashSet<>();
 
         if (eventType.getName().equals("MOUSE_PRESSED")) {
             Image latestSave = savedImages.get(savedImages.size() - 1);
             Coordinate startCoordinate = new Coordinate((int)mouseX, (int)mouseY);
-            toCheck.add(startCoordinate);
+            int arrayIndex = 0;
+            toCheck[0] = startCoordinate;
             PixelReader pixelReader = latestSave.getPixelReader();
             Color colorToChange = pixelReader.getColor((int)mouseX, (int)mouseY);
 
-            while (!toCheck.isEmpty()) {
-                Coordinate check = toCheck.iterator().next();
+            while (arrayIndex != -1) {
+                Coordinate check = toCheck[arrayIndex];
+                arrayIndex -= 1;
                 Color pixelColor = pixelReader.getColor(check.getX(), check.getY());
-                if (pixelColor.toString().equals(colorToChange.toString())) {
+                if (pixelColor.equals(colorToChange)) {
                     toColor.add(check);
                     Coordinate co1 = new Coordinate(check.getX() + 1, check.getY());
                     Coordinate co2 = new Coordinate(check.getX() - 1, check.getY());
                     Coordinate co3 = new Coordinate(check.getX(), check.getY() + 1);
                     Coordinate co4 = new Coordinate(check.getX(), check.getY() - 1);
-                    if (!checked.contains(co1)) {
-                        toCheck.add(co1);
+                    if (!processed.contains(co1)) {
+                        toCheck[++arrayIndex] = co1;
+                        processed.add(co1);
                     }
-                    if (!checked.contains(co2)) {
-                        toCheck.add(co2);
+                    if (!processed.contains(co2)) {
+                        toCheck[++arrayIndex] = co2;
+                        processed.add(co2);
                     }
-                    if (!checked.contains(co3)) {
-                        toCheck.add(co3);
+                    if (!processed.contains(co3)) {
+                        toCheck[++arrayIndex] = co3;
+                        processed.add(co3);
                     }
-                    if (!checked.contains(co4)) {
-                        toCheck.add(co4);
+                    if (!processed.contains(co4)) {
+                        toCheck[++arrayIndex] = co4;
+                        processed.add(co4);
                     }
                 }
-                toCheck.remove(check);
-                checked.add(check);
             }
 
             for (Coordinate co : toColor) {
