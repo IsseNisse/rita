@@ -33,6 +33,12 @@
         <items>
             <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#freeDrawBtn" text="Draw" />
           <Button mnemonicParsing="false" onAction="#drawLineBtn" text="Line" />
+            <MenuButton mnemonicParsing="false" text="Shapes">
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#SquareBtn" text="Square" />
+                <MenuItem mnemonicParsing="false" onAction="#CircleBtn" text="Circle" />
+              </items>
+            </MenuButton>
             <Button layoutX="10.0" layoutY="40.0" mnemonicParsing="false" onAction="#fillBtn" text="Fill" />
         </items>
       </ToolBar>
