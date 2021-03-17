@@ -1,6 +1,5 @@
 package sample;
 
-import com.sun.javafx.geom.Path2D;
 import javafx.event.ActionEvent;
 import javafx.event.EventType;
 import javafx.fxml.FXML;
@@ -34,7 +33,7 @@ public class drawController {
     private double anchor2Y;
 
     private String drawFunction = "freeDraw";
-
+    private String shape = "circle";
 
 
     public void draw(javafx.scene.input.MouseEvent mouseEvent) {
@@ -59,7 +58,7 @@ public class drawController {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
         if (!eventType.getName().equals("MOUSE_RELEASED")) {
             gc.setFill(color);
-            gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
+            brush(gc, mouseX, mouseY);
         } else {
             /* save snapshot */
             makeSnapshot(savedImages);
@@ -98,47 +97,59 @@ public class drawController {
 
     private void fill(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
-        Stack<Coordinate> toCheck = new Stack<>();
+        Coordinate[] toCheck = new Coordinate[1913600];
         HashSet<Coordinate> toColor = new HashSet<>();
-        HashSet<Coordinate> checked = new HashSet<>();
+        HashSet<Coordinate> processed = new HashSet<>();
 
         if (eventType.getName().equals("MOUSE_PRESSED")) {
             Image latestSave = savedImages.get(savedImages.size() - 1);
             Coordinate startCoordinate = new Coordinate((int)mouseX, (int)mouseY);
-            toCheck.add(startCoordinate);
+            int arrayIndex = 0;
+            toCheck[0] = startCoordinate;
             PixelReader pixelReader = latestSave.getPixelReader();
             Color colorToChange = pixelReader.getColor((int)mouseX, (int)mouseY);
 
-            while (!toCheck.isEmpty()) {
-                Coordinate check = toCheck.pop();
+            while (arrayIndex != -1) {
+                Coordinate check = toCheck[arrayIndex];
+                arrayIndex -= 1;
                 Color pixelColor = pixelReader.getColor(check.getX(), check.getY());
-                if (pixelColor.toString().equals(colorToChange.toString())) {
+                if (pixelColor.equals(colorToChange)) {
                     toColor.add(check);
                     Coordinate co1 = new Coordinate(check.getX() + 1, check.getY());
                     Coordinate co2 = new Coordinate(check.getX() - 1, check.getY());
                     Coordinate co3 = new Coordinate(check.getX(), check.getY() + 1);
                     Coordinate co4 = new Coordinate(check.getX(), check.getY() - 1);
-                    if (!checked.contains(co1)) {
-                        toCheck.add(co1);
+                    if (!processed.contains(co1)) {
+                        toCheck[++arrayIndex] = co1;
+                        processed.add(co1);
                     }
-                    if (!checked.contains(co2)) {
-                        toCheck.add(co2);
+                    if (!processed.contains(co2)) {
+                        toCheck[++arrayIndex] = co2;
+                        processed.add(co2);
                     }
-                    if (!checked.contains(co3)) {
-                        toCheck.add(co3);
+                    if (!processed.contains(co3)) {
+                        toCheck[++arrayIndex] = co3;
+                        processed.add(co3);
                     }
-                    if (!checked.contains(co4)) {
-                        toCheck.add(co4);
+                    if (!processed.contains(co4)) {
+                        toCheck[++arrayIndex] = co4;
+                        processed.add(co4);
                     }
                 }
-
-                checked.add(check);
             }
 
             for (Coordinate co : toColor) {
                 gc.setFill(color);
                 gc.fillRect(co.getX(), co.getY(), 1, 1);
             }
+        }
+    }
+
+    private void brush(GraphicsContext gc, double mouseX, double mouseY) {
+        if (shape.equals("square")) {
+            gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
+        } else if (shape.equals("circle")) {
+            gc.fillOval(mouseX - (size/2), mouseY - (size/2), size, size);
         }
     }
 
@@ -198,6 +209,14 @@ public class drawController {
     public void openBtn(ActionEvent actionEvent) {
         Image image = Controller.openBtn();
         canvas.getGraphicsContext2D().drawImage(image, 0, 0);
+    }
+
+    public void Square(ActionEvent actionEvent) {
+        shape = "square";
+    }
+
+    public void Circle(ActionEvent actionEvent) {
+        shape = "circle";
     }
 
     public void saveBtn(ActionEvent actionEvent) {

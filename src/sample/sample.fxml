@@ -48,6 +48,12 @@
                   <MenuItem id="25px" mnemonicParsing="false" onAction="#size80" text="80px" />
               </items>
             </MenuButton>
+            <MenuButton layoutX="66.0" layoutY="11.0" mnemonicParsing="false" text="Brush Shape">
+               <items>
+                  <MenuItem id="10px" mnemonicParsing="false" onAction="#Square" text="Square" />
+                  <MenuItem id="10px" mnemonicParsing="false" onAction="#Circle" text="Circle" />
+               </items>
+            </MenuButton>
             <ColorPicker fx:id="colorPicker" onAction="#colorPicker">
                <value>
                   <Color />
