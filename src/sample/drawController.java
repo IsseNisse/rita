@@ -8,6 +8,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
@@ -36,6 +38,7 @@ public class drawController {
 
     private String drawFunction = "freeDraw";
     private String brushShape = "circle";
+    private boolean keyPressed;
 
 
     public void draw(javafx.scene.input.MouseEvent mouseEvent) {
@@ -151,6 +154,8 @@ public class drawController {
 
     /* Function for general shape drawing and animation */
     private void shapeDraw(GraphicsContext gc, double mouseX, double mouseY, EventType<? extends MouseEvent> eventType, String shape) {
+        double height;
+        double width;
         if (!eventType.getName().equals("MOUSE_RELEASED")) {
             if (eventType.getName().equals("MOUSE_PRESSED")) {
                 anchor1X = mouseX;
@@ -161,13 +166,23 @@ public class drawController {
                     Image undoImage = savedLines.get(savedLines.size() - 1);
                     canvas.getGraphicsContext2D().drawImage(undoImage, 0, 0);
                 }
-                double width = mouseX - anchor1X;
-                double height = mouseY - anchor1Y;
+                if (keyPressed) {
+                    width = mouseX;
+                    height = mouseX;
+                } else {
+                    width = mouseX - anchor1X;
+                    height = mouseY - anchor1Y;
+                }
                 whichShapeToBeDrawn(gc, mouseX, mouseY, shape, width, height);
             }
         } else {
-            double width = mouseX - anchor1X;
-            double height = mouseY - anchor1Y;
+            if (keyPressed) {
+                width = mouseX;
+                height = mouseX;
+            } else {
+                width = mouseX - anchor1X;
+                height = mouseY - anchor1Y;
+            }
             whichShapeToBeDrawn(gc, mouseX, mouseY, shape, width, height);
 
             /* save snapshot */
@@ -324,5 +339,10 @@ public class drawController {
     /* Remove all saved Images */
     public static void emptySavedImages() {
         savedImages.clear();
+    }
+
+    public void keyPressed(KeyEvent keyEvent) {
+        keyPressed = keyEvent.isShiftDown();
+        System.out.println(keyPressed);
     }
 }
