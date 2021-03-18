@@ -19,13 +19,17 @@ public class drawController {
     private Canvas canvas;
 
     @FXML
-    private ColorPicker colorPicker;
+    private ColorPicker strokeColorPicker;
+
+    @FXML
+    private ColorPicker fillColorPicker;
 
     private static final Stack<Image> savedImages = new Stack<>();
     private final Stack<Image> savedLines = new Stack<>();
 
     private int size = 10;
-    private Color color = Color.BLACK;
+    private Color strokeColor = Color.BLACK;
+    private Color fillColor = Color.TRANSPARENT;
 
     private double anchor1X;
     private double anchor1Y;
@@ -43,16 +47,22 @@ public class drawController {
         double mouseX = mouseEvent.getX();
         double mouseY = mouseEvent.getY();
 
-        if (drawFunction.equals("freeDraw")) {
-            freeDraw(gc, mouseX, mouseY, mouseEvent);
-        } else if (drawFunction.equals("drawLine")) {
-            drawLine(gc, mouseX, mouseY, mouseEvent);
-        } else if (drawFunction.equals("fill")) {
-            fill(gc, mouseX, mouseY, mouseEvent);
-        } else if (drawFunction.equals("drawSquare")) {
-            drawSquare(gc, mouseX, mouseY, mouseEvent);
-        } else if (drawFunction.equals("drawCircle")) {
-            drawCircle(gc, mouseX, mouseY, mouseEvent);
+        switch (drawFunction) {
+            case "freeDraw":
+                freeDraw(gc, mouseX, mouseY, mouseEvent);
+                break;
+            case "drawLine":
+                drawLine(gc, mouseX, mouseY, mouseEvent);
+                break;
+            case "fill":
+                fill(gc, mouseX, mouseY, mouseEvent);
+                break;
+            case "drawSquare":
+                drawSquare(gc, mouseX, mouseY, mouseEvent);
+                break;
+            case "drawCircle":
+                drawCircle(gc, mouseX, mouseY, mouseEvent);
+                break;
         }
     }
 
@@ -61,7 +71,7 @@ public class drawController {
     public void freeDraw(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
         if (!eventType.getName().equals("MOUSE_RELEASED")) {
-            gc.setFill(color);
+            gc.setFill(strokeColor);
             brush(gc, mouseX, mouseY);
         } else {
             /* save snapshot */
@@ -119,7 +129,7 @@ public class drawController {
             }
 
             for (Coordinate co : toColor) {
-                gc.setFill(color);
+                gc.setFill(strokeColor);
                 gc.fillRect(co.getX(), co.getY(), 1, 1);
             }
             makeSnapshot(savedImages);
@@ -184,20 +194,24 @@ public class drawController {
 
     /* The functions for actually drawing a shape */
     private void makeLine(GraphicsContext gc, double mouseX, double mouseY) {
-        gc.setStroke(color);
+        gc.setStroke(strokeColor);
         gc.setLineWidth(size);
         gc.strokeLine(anchor1X, anchor1Y, mouseX, mouseY);
     }
 
     private void makeSquare(GraphicsContext gc, double width, double height) {
-        gc.setStroke(color);
+        gc.setStroke(strokeColor);
+        gc.setFill(fillColor);
         gc.setLineWidth(size);
+        gc.fillRect(anchor1X, anchor1Y, width, height);
         gc.strokeRect(anchor1X, anchor1Y, width, height);
     }
 
     private void makeCircle(GraphicsContext gc, double width, double height) {
-        gc.setStroke(color);
+        gc.setStroke(strokeColor);
+        gc.setFill(fillColor);
         gc.setLineWidth(size);
+        gc.fillOval(anchor1X, anchor1Y, width, height);
         gc.strokeOval(anchor1X, anchor1Y, width, height);
     }
 
@@ -229,9 +243,14 @@ public class drawController {
 
 
     /* Get Color Picker value */
-    public void colorPicker(ActionEvent actionEvent) {
-        Color colorValue = colorPicker.getValue();
-        color = Color.web(colorValue.toString());
+    public void strokeColorPicker(ActionEvent actionEvent) {
+        Color colorValue = strokeColorPicker.getValue();
+        strokeColor = Color.web(colorValue.toString());
+    }
+
+    public void fillColorPicker(ActionEvent actionEvent) {
+        Color colorValue = fillColorPicker.getValue();
+        fillColor = Color.web(colorValue.toString());
     }
 
 

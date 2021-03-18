@@ -40,6 +40,21 @@
               </items>
             </MenuButton>
             <Button layoutX="10.0" layoutY="40.0" mnemonicParsing="false" onAction="#fillBtn" text="Fill" />
+            <Label text="Stroke Color">
+               <padding>
+                  <Insets top="20.0" />
+               </padding></Label>
+            <ColorPicker fx:id="strokeColorPicker" onAction="#strokeColorPicker">
+               <value>
+                  <Color />
+               </value>
+            </ColorPicker>
+            <Label layoutX="10.0" layoutY="130.0" text="Fill Color" />
+            <ColorPicker fx:id="fillColorPicker" layoutX="10.0" layoutY="170.0" onAction="#fillColorPicker">
+               <value>
+                  <Color red="1.0" green="1.0" blue="1.0" opacity="0.0" />
+               </value>
+            </ColorPicker>
         </items>
       </ToolBar>
       <ToolBar maxWidth="1.7976931348623157E308" nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS">
@@ -60,10 +75,6 @@
                   <MenuItem id="10px" mnemonicParsing="false" onAction="#Circle" text="Circle" />
                </items>
             </MenuButton>
-            <ColorPicker fx:id="colorPicker" onAction="#colorPicker">
-               <value>
-                  <Color />
-               </value></ColorPicker>
         </items>
       </ToolBar>
    </children>
