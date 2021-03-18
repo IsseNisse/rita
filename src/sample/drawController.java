@@ -8,6 +8,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
@@ -19,21 +21,24 @@ public class drawController {
     private Canvas canvas;
 
     @FXML
-    private ColorPicker colorPicker;
+    private ColorPicker strokeColorPicker;
+
+    @FXML
+    private ColorPicker fillColorPicker;
 
     private static final Stack<Image> savedImages = new Stack<>();
     private final Stack<Image> savedLines = new Stack<>();
 
     private int size = 10;
-    private Color color = Color.BLACK;
+    private Color strokeColor = Color.BLACK;
+    private Color fillColor = Color.TRANSPARENT;
 
     private double anchor1X;
     private double anchor1Y;
-    private double anchor2X;
-    private double anchor2Y;
 
     private String drawFunction = "freeDraw";
-    private String shape = "circle";
+    private String brushShape = "circle";
+    private boolean keyPressed;
 
 
     public void draw(javafx.scene.input.MouseEvent mouseEvent) {
@@ -45,19 +50,31 @@ public class drawController {
         double mouseX = mouseEvent.getX();
         double mouseY = mouseEvent.getY();
 
-        if (drawFunction.equals("freeDraw")) {
-            freeDraw(gc, mouseX, mouseY, mouseEvent);
-        } else if (drawFunction.equals("drawLine")) {
-            drawLine(gc, mouseX, mouseY, mouseEvent);
-        } else if (drawFunction.equals("fill")) {
-            fill(gc, mouseX, mouseY, mouseEvent);
+        switch (drawFunction) {
+            case "freeDraw":
+                freeDraw(gc, mouseX, mouseY, mouseEvent);
+                break;
+            case "drawLine":
+                drawLine(gc, mouseX, mouseY, mouseEvent);
+                break;
+            case "fill":
+                fill(gc, mouseX, mouseY, mouseEvent);
+                break;
+            case "drawSquare":
+                drawSquare(gc, mouseX, mouseY, mouseEvent);
+                break;
+            case "drawCircle":
+                drawCircle(gc, mouseX, mouseY, mouseEvent);
+                break;
         }
     }
 
+
+    /* Functions for different types of drawing */
     public void freeDraw(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
         if (!eventType.getName().equals("MOUSE_RELEASED")) {
-            gc.setFill(color);
+            gc.setFill(strokeColor);
             brush(gc, mouseX, mouseY);
         } else {
             /* save snapshot */
@@ -67,37 +84,13 @@ public class drawController {
 
     public void drawLine(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
-
-        if (!eventType.getName().equals("MOUSE_RELEASED")) {
-            if (eventType.getName().equals("MOUSE_PRESSED")) {
-                anchor1X = mouseX;
-                anchor1Y = mouseY;
-                makeSnapshot(savedLines);
-            } else if (eventType.getName().equals("MOUSE_DRAGGED")) {
-                if (!savedLines.empty()) {
-                    Image undoImage = savedLines.get(savedLines.size() - 1);
-                    canvas.getGraphicsContext2D().drawImage(undoImage, 0, 0);
-                }
-                gc.setStroke(color);
-                gc.setLineWidth(size);
-                gc.strokeLine(anchor1X, anchor1Y, mouseX, mouseY);
-
-            }
-        } else {
-            anchor2X = mouseX;
-            anchor2Y = mouseY;
-            gc.setStroke(color);
-            gc.setLineWidth(size);
-            gc.strokeLine(anchor1X, anchor1Y, anchor2X, anchor2Y);
-
-            /* save snapshot */
-            makeSnapshot(savedImages);
-        }
+        String shape = "line";
+        shapeDraw(gc, mouseX, mouseY, eventType, shape);
     }
 
     private void fill(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
         EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
-        Coordinate[] toCheck = new Coordinate[1913600];
+        Coordinate[] toCheck = new Coordinate[(int) (canvas.getWidth() * canvas.getHeight())];
         HashSet<Coordinate> toColor = new HashSet<>();
         HashSet<Coordinate> processed = new HashSet<>();
 
@@ -139,25 +132,123 @@ public class drawController {
             }
 
             for (Coordinate co : toColor) {
-                gc.setFill(color);
+                gc.setFill(strokeColor);
                 gc.fillRect(co.getX(), co.getY(), 1, 1);
             }
+            makeSnapshot(savedImages);
         }
     }
 
+    private void drawSquare(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
+        EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
+        String shape = "square";
+        shapeDraw(gc, mouseX, mouseY, eventType, shape);
+    }
+
+    private void drawCircle(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
+        EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
+        String shape = "circle";
+        shapeDraw(gc, mouseX, mouseY, eventType, shape);
+    }
+
+
+    /* Function for general shape drawing and animation */
+    private void shapeDraw(GraphicsContext gc, double mouseX, double mouseY, EventType<? extends MouseEvent> eventType, String shape) {
+        double height;
+        double width;
+        if (!eventType.getName().equals("MOUSE_RELEASED")) {
+            if (eventType.getName().equals("MOUSE_PRESSED")) {
+                anchor1X = mouseX;
+                anchor1Y = mouseY;
+                makeSnapshot(savedLines);
+            } else if (eventType.getName().equals("MOUSE_DRAGGED")) {
+                if (!savedLines.empty()) {
+                    Image undoImage = savedLines.get(savedLines.size() - 1);
+                    canvas.getGraphicsContext2D().drawImage(undoImage, 0, 0);
+                }
+                if (keyPressed) {
+                    width = mouseX;
+                    height = mouseX;
+                } else {
+                    width = mouseX - anchor1X;
+                    height = mouseY - anchor1Y;
+                }
+                whichShapeToBeDrawn(gc, mouseX, mouseY, shape, width, height);
+            }
+        } else {
+            if (keyPressed) {
+                width = mouseX;
+                height = mouseX;
+            } else {
+                width = mouseX - anchor1X;
+                height = mouseY - anchor1Y;
+            }
+            whichShapeToBeDrawn(gc, mouseX, mouseY, shape, width, height);
+
+            /* save snapshot */
+            makeSnapshot(savedImages);
+        }
+    }
+
+
+    /* Switch case to decide which function is calling on shapeDraw */
+    private void whichShapeToBeDrawn(GraphicsContext gc, double mouseX, double mouseY, String shape, double width, double height) {
+        switch (shape) {
+            case "circle":
+                makeCircle(gc, width, height);
+                break;
+            case "square":
+                makeSquare(gc, width, height);
+                break;
+            case "line":
+                makeLine(gc, mouseX, mouseY);
+                break;
+        }
+    }
+
+
+    /* The functions for actually drawing a shape */
+    private void makeLine(GraphicsContext gc, double mouseX, double mouseY) {
+        gc.setStroke(strokeColor);
+        gc.setLineWidth(size);
+        gc.strokeLine(anchor1X, anchor1Y, mouseX, mouseY);
+    }
+
+    private void makeSquare(GraphicsContext gc, double width, double height) {
+        gc.setStroke(strokeColor);
+        gc.setFill(fillColor);
+        gc.setLineWidth(size);
+        gc.fillRect(anchor1X, anchor1Y, width, height);
+        gc.strokeRect(anchor1X, anchor1Y, width, height);
+    }
+
+    private void makeCircle(GraphicsContext gc, double width, double height) {
+        gc.setStroke(strokeColor);
+        gc.setFill(fillColor);
+        gc.setLineWidth(size);
+        gc.fillOval(anchor1X, anchor1Y, width, height);
+        gc.strokeOval(anchor1X, anchor1Y, width, height);
+    }
+
+
+    /* Function for deciding which shape on the brush is to be used */
     private void brush(GraphicsContext gc, double mouseX, double mouseY) {
-        if (shape.equals("square")) {
+        if (brushShape.equals("square")) {
             gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
-        } else if (shape.equals("circle")) {
+        } else if (brushShape.equals("circle")) {
             gc.fillOval(mouseX - (size/2), mouseY - (size/2), size, size);
         }
     }
 
+
+    /* Make a snapshot function */
     private void makeSnapshot(Stack<Image> savedImages) {
         Image snapshot = canvas.snapshot(null, null);
         savedImages.push(snapshot);
     }
 
+
+    /* Undo function */
     public void undo(ActionEvent actionEvent) {
         if (!savedImages.empty()) {
             Image undoImage = savedImages.pop();
@@ -165,9 +256,16 @@ public class drawController {
         }
     }
 
-    public void colorPicker(ActionEvent actionEvent) {
-        Color colorValue = colorPicker.getValue();
-        color = Color.web(colorValue.toString());
+
+    /* Get Color Picker value */
+    public void strokeColorPicker(ActionEvent actionEvent) {
+        Color colorValue = strokeColorPicker.getValue();
+        strokeColor = Color.web(colorValue.toString());
+    }
+
+    public void fillColorPicker(ActionEvent actionEvent) {
+        Color colorValue = fillColorPicker.getValue();
+        fillColor = Color.web(colorValue.toString());
     }
 
 
@@ -181,7 +279,17 @@ public class drawController {
         drawFunction = "drawLine";
     }
 
-    public void fillBtn(ActionEvent actionEvent) { drawFunction = "fill"; }
+    public void fillBtn(ActionEvent actionEvent) {
+        drawFunction = "fill";
+    }
+
+    public void SquareBtn(ActionEvent actionEvent) {
+        drawFunction = "drawSquare";
+    }
+
+    public void CircleBtn(ActionEvent actionEvent) {
+        drawFunction = "drawCircle";
+    }
 
 
     /* Size buttons */
@@ -206,17 +314,19 @@ public class drawController {
         size = 80;
     }
 
+
+    /* Button Actions */
     public void openBtn(ActionEvent actionEvent) {
         Image image = Controller.openBtn();
         canvas.getGraphicsContext2D().drawImage(image, 0, 0);
     }
 
     public void Square(ActionEvent actionEvent) {
-        shape = "square";
+        brushShape = "square";
     }
 
     public void Circle(ActionEvent actionEvent) {
-        shape = "circle";
+        brushShape = "circle";
     }
 
     public void saveBtn(ActionEvent actionEvent) {
@@ -225,7 +335,14 @@ public class drawController {
         Controller.saveBtn(latestImage);
     }
 
+
+    /* Remove all saved Images */
     public static void emptySavedImages() {
         savedImages.clear();
+    }
+
+    public void keyPressed(KeyEvent keyEvent) {
+        keyPressed = keyEvent.isShiftDown();
+        System.out.println(keyPressed);
     }
 }
