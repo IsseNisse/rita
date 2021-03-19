@@ -8,7 +8,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -65,6 +64,9 @@ public class drawController {
                 break;
             case "drawCircle":
                 drawCircle(gc, mouseX, mouseY, mouseEvent);
+                break;
+            case "drawTriangle":
+                drawTriangle(gc, mouseX, mouseY, mouseEvent);
                 break;
         }
     }
@@ -132,7 +134,7 @@ public class drawController {
             }
 
             for (Coordinate co : toColor) {
-                gc.setFill(strokeColor);
+                gc.setFill(fillColor);
                 gc.fillRect(co.getX(), co.getY(), 1, 1);
             }
             makeSnapshot(savedImages);
@@ -151,6 +153,12 @@ public class drawController {
         shapeDraw(gc, mouseX, mouseY, eventType, shape);
     }
 
+    private void drawTriangle(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
+        EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
+        String shape = "triangle";
+        shapeDraw(gc, mouseX, mouseY, eventType, shape);
+    }
+
 
     /* Function for general shape drawing and animation */
     private void shapeDraw(GraphicsContext gc, double mouseX, double mouseY, EventType<? extends MouseEvent> eventType, String shape) {
@@ -166,21 +174,19 @@ public class drawController {
                     Image undoImage = savedLines.get(savedLines.size() - 1);
                     canvas.getGraphicsContext2D().drawImage(undoImage, 0, 0);
                 }
+                width = mouseX - anchor1X;
                 if (keyPressed) {
-                    width = mouseX;
-                    height = mouseX;
+                    height = width;
                 } else {
-                    width = mouseX - anchor1X;
                     height = mouseY - anchor1Y;
                 }
                 whichShapeToBeDrawn(gc, mouseX, mouseY, shape, width, height);
             }
         } else {
+            width = mouseX - anchor1X;
             if (keyPressed) {
-                width = mouseX;
-                height = mouseX;
+                height = width;
             } else {
-                width = mouseX - anchor1X;
                 height = mouseY - anchor1Y;
             }
             whichShapeToBeDrawn(gc, mouseX, mouseY, shape, width, height);
@@ -202,6 +208,9 @@ public class drawController {
                 break;
             case "line":
                 makeLine(gc, mouseX, mouseY);
+                break;
+            case "triangle":
+                makeTriangle(gc, mouseX, mouseY);
                 break;
         }
     }
@@ -228,6 +237,16 @@ public class drawController {
         gc.setLineWidth(size);
         gc.fillOval(anchor1X, anchor1Y, width, height);
         gc.strokeOval(anchor1X, anchor1Y, width, height);
+    }
+
+    private void makeTriangle(GraphicsContext gc, double mouseX, double mouseY) {
+        double[] xArray = {anchor1X, mouseX, anchor1X - (anchor1X - mouseX) * 2};
+        double[] yArray = {anchor1Y, mouseY, anchor1Y};
+        gc.setStroke(strokeColor);
+        gc.setFill(fillColor);
+        gc.setLineWidth(size);
+        gc.fillPolygon(xArray, yArray, 3);
+        gc.strokePolygon(xArray, yArray, 3);
     }
 
 
@@ -291,6 +310,10 @@ public class drawController {
         drawFunction = "drawCircle";
     }
 
+    public void triangleBtn(ActionEvent actionEvent) {
+        drawFunction = "drawTriangle";
+    }
+
 
     /* Size buttons */
 
@@ -335,14 +358,15 @@ public class drawController {
         Controller.saveBtn(latestImage);
     }
 
-
-    /* Remove all saved Images */
-    public static void emptySavedImages() {
-        savedImages.clear();
-    }
-
     public void keyPressed(KeyEvent keyEvent) {
         keyPressed = keyEvent.isShiftDown();
         System.out.println(keyPressed);
     }
+
+    /* Remove all saved Images */
+
+    public static void emptySavedImages() {
+        savedImages.clear();
+    }
+
 }

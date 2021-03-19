@@ -37,6 +37,7 @@
               <items>
                 <MenuItem mnemonicParsing="false" onAction="#SquareBtn" text="Square" />
                 <MenuItem mnemonicParsing="false" onAction="#CircleBtn" text="Circle" />
+                  <MenuItem mnemonicParsing="false" onAction="#triangleBtn" text="Triangle" />
               </items>
             </MenuButton>
             <Button layoutX="10.0" layoutY="40.0" mnemonicParsing="false" onAction="#fillBtn" text="Fill" />
