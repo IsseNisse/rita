@@ -68,9 +68,10 @@ public class drawController {
             case "drawTriangle":
                 drawTriangle(gc, mouseX, mouseY, mouseEvent);
                 break;
+            case "erase":
+                erase(gc, mouseX, mouseY, mouseEvent);
         }
     }
-
 
     /* Functions for different types of drawing */
     public void freeDraw(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
@@ -158,6 +159,19 @@ public class drawController {
         String shape = "triangle";
         shapeDraw(gc, mouseX, mouseY, eventType, shape);
     }
+
+    private void erase(GraphicsContext gc, double mouseX, double mouseY, MouseEvent mouseEvent) {
+        System.out.println("erase");
+        EventType<? extends MouseEvent> eventType = mouseEvent.getEventType();
+        if (!eventType.getName().equals("MOUSE_RELEASED")) {
+            gc.setFill(Color.TRANSPARENT);
+            brush(gc, mouseX, mouseY);
+        } else {
+            /* save snapshot */
+            makeSnapshot(savedImages);
+        }
+    }
+
 
 
     /* Function for general shape drawing and animation */
@@ -253,9 +267,17 @@ public class drawController {
     /* Function for deciding which shape on the brush is to be used */
     private void brush(GraphicsContext gc, double mouseX, double mouseY) {
         if (brushShape.equals("square")) {
-            gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
+            if (drawFunction.equals("erase")) {
+                gc.clearRect(mouseX - (size/2), mouseY - (size/2), size, size);
+            } else {
+                gc.fillRect(mouseX - (size/2), mouseY - (size/2), size, size);
+            }
         } else if (brushShape.equals("circle")) {
-            gc.fillOval(mouseX - (size/2), mouseY - (size/2), size, size);
+            if (drawFunction.equals("erase")) {
+                gc.clearRect(mouseX - (size/2), mouseY - (size/2), size, size);
+            } else {
+                gc.fillOval(mouseX - (size/2), mouseY - (size/2), size, size);
+            }
         }
     }
 
@@ -314,6 +336,10 @@ public class drawController {
         drawFunction = "drawTriangle";
     }
 
+    public void eraserBtn(ActionEvent actionEvent) {
+        drawFunction = "erase";
+    }
+
 
     /* Size buttons */
 
@@ -368,5 +394,4 @@ public class drawController {
     public static void emptySavedImages() {
         savedImages.clear();
     }
-
 }

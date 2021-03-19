@@ -76,6 +76,7 @@
                   <MenuItem id="10px" mnemonicParsing="false" onAction="#Circle" text="Circle" />
                </items>
             </MenuButton>
+            <Button mnemonicParsing="false" onAction="#eraserBtn" text="Eraser" />
         </items>
       </ToolBar>
    </children>
